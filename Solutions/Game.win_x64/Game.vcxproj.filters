@@ -7,6 +7,9 @@
     <ClCompile Include="D:\Cryengine-Projekte\HelCry\Code\GamePlugin.cpp">
       <Filter>Main</Filter>
     </ClCompile>
+    <ClCompile Include="D:\Cryengine-Projekte\HelCry\Code\GameRules\GameRules.cpp">
+      <Filter>GameRules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D:\Cryengine-Projekte\HelCry\Code\StdAfx.h">
@@ -21,6 +24,9 @@
     <ClInclude Include="D:\Cryengine-Projekte\HelCry\Code\Player\ISimpleActor.h">
       <Filter>Player</Filter>
     </ClInclude>
+    <ClInclude Include="D:\Cryengine-Projekte\HelCry\Code\GameRules\GameRules.h">
+      <Filter>GameRules</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D:\Cryengine-Projekte\HelCry\Code\CMakeLists.txt" />
@@ -31,6 +37,9 @@
     </Filter>
     <Filter Include="Entities">
       <UniqueIdentifier>{0D949753-D5D5-37E9-9DB4-F2243571DD9E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameRules">
+      <UniqueIdentifier>{BAD99204-4569-3F0B-AF2B-A2430D4C8454}</UniqueIdentifier>
     </Filter>
     <Filter Include="Player">
       <UniqueIdentifier>{10C0978A-BEF1-3344-B271-F215C78A6C13}</UniqueIdentifier>

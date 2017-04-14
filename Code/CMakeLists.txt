@@ -25,6 +25,13 @@ set (SourceGroup_EntityHelpers
 )
 source_group("Entities" FILES ${SourceGroup_EntityHelpers})
 
+set (SourceGroup_GameRules
+	"GameRules/GameRules.h"
+	"GameRules/GameRules.cpp"
+)
+source_group("GameRules" FILES ${SourceGroup_GameRules})
+
+
 set (SourceGroup_Player
 	"Player/ISimpleActor.h"
 )
@@ -34,6 +41,7 @@ set (SOURCE
 	${SourceGroup_PluginMain}
 	${SourceGroup_EntityHelpers}
 	${SourceGroup_Player}
+	${SourceGroup_GameRules}
 )
 
 if(OPTION_PCH AND MSVC)
