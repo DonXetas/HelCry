@@ -15,7 +15,8 @@
 // Define our class "Player", with this class we will control the player
 // Our custom Player has to inherit from the Interface "ISimpleActor" to give us some of the predefined functions we need
 // Our custom Player has to inherit from the Interface "IGameObjectView" to set the camera to the Player
-class CPlayer : public CGameObjectExtensionHelper<CPlayer, ISimpleActor>, public IGameObjectView
+// Our custom Player has to inherit from the Interface "IActionListener" to react to the input of the Player
+class CPlayer : public CGameObjectExtensionHelper<CPlayer, ISimpleActor>, public IGameObjectView, public IActionListener
 {
 public:
 	// Constructor
@@ -41,4 +42,8 @@ public:
 	virtual void PostUpdateView(SViewParams& _params) override {};
 
 #pragma endregion IGameObjectView
+
+	// IActionListener
+	// Do something on input
+	virtual void OnAction(const ActionId& _action, int _activationMode, float _value) override;
 };

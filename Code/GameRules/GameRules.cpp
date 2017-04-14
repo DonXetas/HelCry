@@ -65,9 +65,21 @@ bool CGameRules::OnClientConnect(int _channelId, bool _isReset)
 	// Get the ActorSystem so we can create/spawn Actors
 	IActorSystem* pActorSystem = gEnv->pGameFramework->GetIActorSystem();
 
-	// Spawn the player with the name "Ericson" at the position (0, 0, 0), the rotation(0, 0, 0) and the scale (1, 1, 1)
+	// Get the mapsize and cast it to float
+	const float fTerrainSize = static_cast<float>(gEnv->p3DEngine->GetTerrainSize());
+
+	// Get the mapheight at the coordinates passed in as paramater
+	const float fTerrainElevation = gEnv->p3DEngine->GetTerrainElevation(fTerrainSize * 0.5f, fTerrainSize * 0.5f);
+
+	// Set a spawnlocation to (0, 0, 0)
+	// Vec3 spawnLocation = ZERO;
+
+	// Set a spawnlocation in the middle of the map and 15 meter above the height calculated earlier
+	Vec3 spawnLocation = Vec3(fTerrainSize * 0.5f , fTerrainSize * 0.5f, fTerrainElevation + 15.0f);
+
+	// Spawn the player with the name "Ericson" at the spawnlocation, the rotation(0, 0, 0) and the scale (1, 1, 1)
 	// 3. Parameter = "Player" has to be the same string as the string in the registrator in Player.cpp
-	IActor* pActor = pActorSystem->CreateActor(_channelId, "Ericson", "Player", ZERO, IDENTITY, Vec3(1, 1, 1));
+	IActor* pActor = pActorSystem->CreateActor(_channelId, "Ericson", "Player", spawnLocation, IDENTITY, Vec3(1, 1, 1));
 
 	// If we have the creation was successful, return true, if not, return false, so the game can't start
 	if (pActor != nullptr)

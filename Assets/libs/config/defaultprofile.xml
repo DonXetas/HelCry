@@ -9,6 +9,10 @@
 	<actionmap name="default" version="1"/>
 	<!---->
 	
+	<actionmap name="simple" version="1">
+		<action name="jump" onPress="1" keyboard="space" />
+	</actionmap>
+	
 	<actionmap name="player" version="1">
 		<action name="moveleft" onPress="1" onRelease="1" retriggerable="1" keyboard="a"/>
 		<action name="moveright" onPress="1" onRelease="1" retriggerable="1" keyboard="d"/>

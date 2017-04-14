@@ -50,7 +50,8 @@ void CPlayer::PostInit(IGameObject* _pGameObject)
 	gEnv->pGameFramework->GetIActorSystem()->AddActor(GetEntityId(), this);
 
 	// Set the actors position in the world
-	GetEntity()->SetWorldTM(Matrix34::Create(Vec3(1, 1, 1), IDENTITY, Vec3(50, 50, 50)));
+	// Commented out due to overwriting the spawnposition in the GameRules.cpp
+	// GetEntity()->SetWorldTM(Matrix34::Create(Vec3(1, 1, 1), IDENTITY, Vec3(50, 50, 50)));
 
 	// Load the Mesh from sphere into the player
 	// Loading a wrong Mesh, will not physicalize the player
@@ -66,6 +67,28 @@ void CPlayer::PostInit(IGameObject* _pGameObject)
 
 	// Attach the "Camera" to the Player/GameObject
 	GetGameObject()->CaptureView(this);
+
+	// Attach the Capturelistener to the Actor, so the Actor reacts on Keyinput
+	GetGameObject()->CaptureActions(this);
+
+	// Get the ActionMapManager, so we can initialize the Keyinput and the profile used for the character
+	IActionMapManager* pActionMapManager = gEnv->pGameFramework->GetIActionMapManager();
+
+	// Initialize the given xml file
+	pActionMapManager->InitActionMaps("libs/config/DefaultProfile.xml");
+	// Enable the file so we can activate a profile inside the file
+	pActionMapManager->Enable(true);
+	// Enable the profile inside the file 
+	pActionMapManager->EnableActionMap("simple", true);
+
+	// Get the keybindings inside the profile
+	IActionMap* pActionMap = pActionMapManager->GetActionMap("simple");
+
+	// If the profile is available set this actor as the listener, so the actor can react to the input
+	if (pActionMap != nullptr)
+	{
+		pActionMap->SetActionListener(GetEntityId());
+	}
 }
 
 //Update the "Camera"
@@ -79,4 +102,29 @@ void CPlayer::UpdateView(SViewParams& _params)
 
 	// Set the Field of View to 75 Degrees
 	_params.fov = DEG2RAD(75);
+}
+
+// Do something on input
+void CPlayer::OnAction(const ActionId& _action, int _activationMode, float _value)
+{
+	// strcmp = string compare
+	// compare the string inside of "_action" to "jump"
+	// if they are equal it returns "0" so we have to compare the result to 0 and do the following: 
+	// (strcmp(_action.c_str(), "jump") == 0)
+	// (!strcmp(_action.c_str(), "jump")) works aswell
+	if (!strcmp(_action.c_str(), "jump"))
+	{
+		// Define an impulse, which will be attached to the Player, so he can jump and the player gets forced
+		pe_action_impulse physicImpulse;
+		physicImpulse.impulse = Vec3(0, 0, 500);
+
+		// Get the PhysicalEntity from the Actor, so we can call the physicsfunction
+		IPhysicalEntity* pPhysicalEntity = GetEntity()->GetPhysicalEntity();
+
+		// If the PhysicalEntity is available then use the impulse on the Player and let him jump
+		if (pPhysicalEntity != nullptr)
+		{
+			pPhysicalEntity->Action(&physicImpulse);
+		}
+	}
 }
