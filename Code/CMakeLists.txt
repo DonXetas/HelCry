@@ -33,6 +33,8 @@ source_group("GameRules" FILES ${SourceGroup_GameRules})
 
 
 set (SourceGroup_Player
+	"Player/Player.h"
+	"Player/Player.cpp"
 	"Player/ISimpleActor.h"
 )
 source_group("Player" FILES ${SourceGroup_Player})

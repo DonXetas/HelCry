@@ -7,6 +7,9 @@
     <ClCompile Include="D:\Cryengine-Projekte\HelCry\Code\GamePlugin.cpp">
       <Filter>Main</Filter>
     </ClCompile>
+    <ClCompile Include="D:\Cryengine-Projekte\HelCry\Code\Player\Player.cpp">
+      <Filter>Player</Filter>
+    </ClCompile>
     <ClCompile Include="D:\Cryengine-Projekte\HelCry\Code\GameRules\GameRules.cpp">
       <Filter>GameRules</Filter>
     </ClCompile>
@@ -20,6 +23,9 @@
     </ClInclude>
     <ClInclude Include="D:\Cryengine-Projekte\HelCry\Code\Entities\Helpers\ISimpleExtension.h">
       <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Cryengine-Projekte\HelCry\Code\Player\Player.h">
+      <Filter>Player</Filter>
     </ClInclude>
     <ClInclude Include="D:\Cryengine-Projekte\HelCry\Code\Player\ISimpleActor.h">
       <Filter>Player</Filter>
