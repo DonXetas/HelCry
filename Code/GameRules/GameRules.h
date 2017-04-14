@@ -20,80 +20,80 @@ public:
 
 	//IGameObjectExtension
 #pragma region
-	virtual void PostInit(IGameObject* pGameObject) override {};
-	virtual void InitClient(int channelId) override {};
-	virtual void PostInitClient(int channelId) override {};
-	virtual bool ReloadExtension(IGameObject* pGameObject, const SEntitySpawnParams& params) override { return false; };
-	virtual void PostReloadExtension(IGameObject* pGameObject, const SEntitySpawnParams& params) override {};
-	virtual void FullSerialize(TSerialize ser) override {};
-	virtual bool NetSerialize(TSerialize ser, EEntityAspects aspect, uint8 profile, int pflags) override { return true; };
+	virtual void PostInit(IGameObject* _pGameObject) override {};
+	virtual void InitClient(int _channelId) override {};
+	virtual void PostInitClient(int _channelId) override {};
+	virtual bool ReloadExtension(IGameObject* _pGameObject, const SEntitySpawnParams& _params) override { return false; };
+	virtual void PostReloadExtension(IGameObject* _pGameObject, const SEntitySpawnParams& _params) override {};
+	virtual void FullSerialize(TSerialize _ser) override {};
+	virtual bool NetSerialize(TSerialize _ser, EEntityAspects _aspect, uint8 _profile, int _pflags) override { return true; };
 	virtual NetworkAspectType GetNetSerializeAspects() { return eEA_All; }
 	virtual void PostSerialize() override {};
-	virtual void                 SerializeSpawnInfo(TSerialize ser) override {};
+	virtual void                 SerializeSpawnInfo(TSerialize _ser) override {};
 	virtual ISerializableInfoPtr GetSpawnInfo() override { return nullptr; };
-	virtual void Update(SEntityUpdateContext& ctx, int updateSlot) override {};
-	virtual void HandleEvent(const SGameObjectEvent& event) override {};
-	virtual void GameSerialize(TSerialize ser) { FullSerialize(ser); };
-	virtual void SetChannelId(uint16 id) override {};
-	virtual void SetAuthority(bool auth) override {};
+	virtual void Update(SEntityUpdateContext& _ctx, int _updateSlot) override {};
+	virtual void HandleEvent(const SGameObjectEvent& _event) override {};
+	virtual void GameSerialize(TSerialize _ser) { FullSerialize(_ser); };
+	virtual void SetChannelId(uint16 _id) override {};
+	virtual void SetAuthority(bool _auth) override {};
 	virtual const void* GetRMIBase() const override { return 0; };
-	virtual void PostUpdate(float frameTime) override {};
+	virtual void PostUpdate(float _frameTime) override {};
 	virtual void PostRemoteSpawn() override {};
 #pragma endregion Functions we do not use, but we had to implement these because they are pure virtual given by the inherited interface
 
 	// Functions we use from the inherited interface
-	virtual bool Init(IGameObject* pGameObject) override;
+	virtual bool Init(IGameObject* _pGameObject) override;
 	//~IGameObjectExtension
 
 	//IGameRules
 #pragma region
-	virtual bool ShouldKeepClient(int channelId, EDisconnectionCause cause, const char* desc) const override { return true; }
+	virtual bool ShouldKeepClient(int _channelId, EDisconnectionCause _cause, const char* _desc) const override { return true; }
 	virtual void PrecacheLevel() override {}
-	virtual void PrecacheLevelResource(const char* resourceName, EGameResourceType resourceType) override {}
-	virtual XmlNodeRef FindPrecachedXmlFile(const char* sFilename) override { return 0; }
-	virtual void OnConnect(struct INetChannel* pNetChannel) override {}
-	virtual void OnDisconnect(EDisconnectionCause cause, const char* desc) override {}
-	virtual void OnEntitySpawn(IEntity* pEntity) override {}
-	virtual void OnEntityRemoved(IEntity* pEntity) override {}
-	virtual void OnEntityReused(IEntity* pEntity, SEntitySpawnParams& params, EntityId prevId) override {}
-	virtual void SendTextMessage(ETextMessageType type, const char* msg, uint32 to = eRMI_ToAllClients, int channelId = -1,
-		const char* p0 = 0, const char* p1 = 0, const char* p2 = 0, const char* p3 = 0) override {}
+	virtual void PrecacheLevelResource(const char* _resourceName, EGameResourceType _resourceType) override {}
+	virtual XmlNodeRef FindPrecachedXmlFile(const char* _sFilename) override { return 0; }
+	virtual void OnConnect(struct INetChannel* _pNetChannel) override {}
+	virtual void OnDisconnect(EDisconnectionCause _cause, const char* _desc) override {}
+	virtual void OnEntitySpawn(IEntity* _pEntity) override {}
+	virtual void OnEntityRemoved(IEntity* _pEntity) override {}
+	virtual void OnEntityReused(IEntity* _pEntity, SEntitySpawnParams& _params, EntityId _prevId) override {}
+	virtual void SendTextMessage(ETextMessageType _type, const char* _msg, uint32 _to = eRMI_ToAllClients, int _channelId = -1,
+		const char* _p0 = 0, const char* _p1 = 0, const char* _p2 = 0, const char* _p3 = 0) override {}
 	virtual void SendChatMessage(EChatMessageType type, EntityId sourceId, EntityId targetId, const char* msg) override {}
-	virtual void ClientHit(const HitInfo& hitInfo) override {}
-	virtual void ServerHit(const HitInfo& hitInfo) override {}
-	virtual int GetHitTypeId(const uint32 crc) const override { return 0; }
-	virtual int GetHitTypeId(const char* type) const override { return 0; }
-	virtual const char* GetHitType(int id) const override { return ""; }
-	virtual void OnVehicleDestroyed(EntityId id) override {}
-	virtual void OnVehicleSubmerged(EntityId id, float ratio) override {}
-	virtual bool CanEnterVehicle(EntityId playerId) override { return true; }
-	virtual void CreateEntityRespawnData(EntityId entityId) override {}
-	virtual bool HasEntityRespawnData(EntityId entityId) const override { return true; }
-	virtual void ScheduleEntityRespawn(EntityId entityId, bool unique, float timer) override {}
-	virtual void AbortEntityRespawn(EntityId entityId, bool destroyData) override {}
-	virtual void ScheduleEntityRemoval(EntityId entityId, float timer, bool visibility) override {}
-	virtual void AbortEntityRemoval(EntityId entityId) override {}
-	virtual void AddHitListener(IHitListener* pHitListener) override {}
-	virtual void RemoveHitListener(IHitListener* pHitListener) override {}
-	virtual bool OnCollision(const SGameCollision& event) override { return true; }
-	virtual void OnCollision_NotifyAI(const EventPhys* pEvent) override {}
+	virtual void ClientHit(const HitInfo& _hitInfo) override {}
+	virtual void ServerHit(const HitInfo& _hitInfo) override {}
+	virtual int GetHitTypeId(const uint32 _crc) const override { return 0; }
+	virtual int GetHitTypeId(const char* _type) const override { return 0; }
+	virtual const char* GetHitType(int _id) const override { return ""; }
+	virtual void OnVehicleDestroyed(EntityId _id) override {}
+	virtual void OnVehicleSubmerged(EntityId _id, float _ratio) override {}
+	virtual bool CanEnterVehicle(EntityId _playerId) override { return true; }
+	virtual void CreateEntityRespawnData(EntityId _entityId) override {}
+	virtual bool HasEntityRespawnData(EntityId _entityId) const override { return true; }
+	virtual void ScheduleEntityRespawn(EntityId _entityId, bool _unique, float _timer) override {}
+	virtual void AbortEntityRespawn(EntityId _entityId, bool _destroyData) override {}
+	virtual void ScheduleEntityRemoval(EntityId _entityId, float _timer, bool _visibility) override {}
+	virtual void AbortEntityRemoval(EntityId _entityId) override {}
+	virtual void AddHitListener(IHitListener* _pHitListener) override {}
+	virtual void RemoveHitListener(IHitListener* _pHitListener) override {}
+	virtual bool OnCollision(const SGameCollision& _event) override { return true; }
+	virtual void OnCollision_NotifyAI(const EventPhys* _pEvent) override {}
 	virtual void ShowStatus() override {}
 	virtual bool IsTimeLimited() const override { return true; }
 	virtual float GetRemainingGameTime() const override { return 0.0f; }
-	virtual void SetRemainingGameTime(float seconds) override {}
+	virtual void SetRemainingGameTime(float _seconds) override {}
 	virtual void ClearAllMigratingPlayers(void) override {}
-	virtual EntityId SetChannelForMigratingPlayer(const char* name, uint16 channelID) override { return INVALID_ENTITYID; }
-	virtual void StoreMigratingPlayer(IActor* pActor) override {}
-	virtual const char* GetTeamName(int teamId) const override { return ""; }
+	virtual EntityId SetChannelForMigratingPlayer(const char* _name, uint16 _channelID) override { return INVALID_ENTITYID; }
+	virtual void StoreMigratingPlayer(IActor* _pActor) override {}
+	virtual const char* GetTeamName(int _teamId) const override { return ""; }
 #pragma endregion Functions we do not use, but we had to implement these because they are pure virtual given by the inherited interface
 
 #pragma region
 	//if Player is connected to the game
-	virtual bool OnClientConnect(int channelId, bool isReset) override;
+	virtual bool OnClientConnect(int _channelId, bool _isReset) override;
 	//If Player is ready for the game
-	virtual bool OnClientEnteredGame(int channelId, bool isReset) override;
+	virtual bool OnClientEnteredGame(int _channelId, bool _isReset) override;
 	//If Player is disconnected from the game
-	virtual void OnClientDisconnect(int channelId, EDisconnectionCause cause, const char* desc, bool keepClient) override;
+	virtual void OnClientDisconnect(int _channelId, EDisconnectionCause _cause, const char* _desc, bool _keepClient) override;
 #pragma endregion Functions we use from the inherited interface
 	//~IGameRules
 };

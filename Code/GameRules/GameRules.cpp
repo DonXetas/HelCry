@@ -45,24 +45,33 @@ CGameRules::~CGameRules()
 }
 
 // Initiate the GameRules
-bool CGameRules::Init(IGameObject* pGameObject)
+bool CGameRules::Init(IGameObject* _pGameObject)
 {
-	return true;
+	// In the Initfunction, always Set the gameobject
+	SetGameObject(_pGameObject);
+
+	// Set the current GameRules to this object, so if this object are the GameRules for Singleplayer, then SingleplayerRules will be set
+	gEnv->pGameFramework->GetIGameRulesSystem()->SetCurrentGameRules(this);
+
+	// In CryEngine everything goes over network, even if it is a singleplayermode, still bind this object to the network, so it will be used
+	return _pGameObject->BindToNetwork();
 }
 
 // If Player is connected to the game
-bool CGameRules::OnClientConnect(int channelId, bool isReset)
+bool CGameRules::OnClientConnect(int _channelId, bool _isReset)
 {
+	// SpawnPlayer 
+
 	return true;
 }
 
 // If Player is ready for the game
-bool CGameRules::OnClientEnteredGame(int channelId, bool isReset)
+bool CGameRules::OnClientEnteredGame(int _channelId, bool _isReset)
 {
 	return true;
 }
 
-void CGameRules::OnClientDisconnect(int channelId, EDisconnectionCause cause, const char* desc, bool keepClient)
+void CGameRules::OnClientDisconnect(int _channelId, EDisconnectionCause _cause, const char* _desc, bool _keepClient)
 {
-
+	// DespawnPlayer
 }
