@@ -48,4 +48,35 @@ void CPlayer::PostInit(IGameObject* _pGameObject)
 {
 	// Add this Actor to the system, so we can use/spawn this actor
 	gEnv->pGameFramework->GetIActorSystem()->AddActor(GetEntityId(), this);
+
+	// Set the actors position in the world
+	GetEntity()->SetWorldTM(Matrix34::Create(Vec3(1, 1, 1), IDENTITY, Vec3(50, 50, 50)));
+
+	// Load the Mesh from sphere into the player
+	// Loading a wrong Mesh, will not physicalize the player
+	GetEntity()->LoadGeometry(0, "objects/sphere.cgf");
+
+	// We want the player to have physics, therefore add the physicalizeparams with PE_RIGID which equals a Rigidbody, so we can collide and move the player
+	SEntityPhysicalizeParams entityPhysicalizeParams;
+	entityPhysicalizeParams.type = PE_RIGID;
+	entityPhysicalizeParams.mass = 100.0f;
+
+	// Apply the properties from above to the Player
+	GetEntity()->Physicalize(entityPhysicalizeParams);
+
+	// Attach the "Camera" to the Player/GameObject
+	GetGameObject()->CaptureView(this);
+}
+
+//Update the "Camera"
+void CPlayer::UpdateView(SViewParams& _params)
+{
+	// Get the position behind the Player
+	_params.position = GetEntity()->GetWorldPos() - GetEntity()->GetWorldRotation().GetColumn1() * 5;
+
+	// Rotate the "Camera" to the Player
+	_params.rotation = Quat::CreateRotationVDir((GetEntity()->GetWorldPos() - _params.position).GetNormalized());
+
+	// Set the Field of View to 75 Degrees
+	_params.fov = DEG2RAD(75);
 }
