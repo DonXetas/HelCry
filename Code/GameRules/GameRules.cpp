@@ -1,4 +1,5 @@
 // We need StdAfx for CryEngine internal functions, which will be called/used
+// Is needed for compiling trough CMake
 #include "StdAfx.h"
 
 // Include the Header file, which defines which functions and variables are used in the class
