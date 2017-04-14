@@ -31,6 +31,8 @@ public:
 	virtual bool Init(IGameObject* _pGameObject) override;
 	// Physicalize, activate actions etc.
 	virtual void PostInit(IGameObject* _pGameObject) override;
+	// Do things every frame
+	virtual void Update(SEntityUpdateContext& _ctx, int _updateSlot) override;
 
 #pragma endregion ISimpleActor
 
@@ -46,4 +48,8 @@ public:
 	// IActionListener
 	// Do something on input
 	virtual void OnAction(const ActionId& _action, int _activationMode, float _value) override;
+
+private:
+	Vec3 m_moveDirection;
+	Vec2 m_mouseDeltaRotation;
 };
