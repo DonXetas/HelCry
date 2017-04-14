@@ -36,3 +36,33 @@ class CGameRulesRegistrator : public IEntityRegistrator
 
 // Variable of the registrator, which handles the registration internally
 CGameRulesRegistrator g_gameRulesRegistrator;
+
+// If the game closes / the GameRules object gets destroyed, set the current GameRules to nothing, so we can change the rules without a problem
+// i.e. from Singleplayer to Multiplayer
+CGameRules::~CGameRules()
+{
+	gEnv->pGameFramework->GetIGameRulesSystem()->SetCurrentGameRules(nullptr);
+}
+
+// Initiate the GameRules
+bool CGameRules::Init(IGameObject* pGameObject)
+{
+	return true;
+}
+
+// If Player is connected to the game
+bool CGameRules::OnClientConnect(int channelId, bool isReset)
+{
+	return true;
+}
+
+// If Player is ready for the game
+bool CGameRules::OnClientEnteredGame(int channelId, bool isReset)
+{
+	return true;
+}
+
+void CGameRules::OnClientDisconnect(int channelId, EDisconnectionCause cause, const char* desc, bool keepClient)
+{
+
+}
