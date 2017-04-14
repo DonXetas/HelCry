@@ -4,6 +4,24 @@
 
 #include "Player.h"
 
+// We have to register our class so it will be recognized as our Player
+// We are inherit from IEntityRegistrator, which gives us the functions to register the class
+class CPlayerRegistrator : public IEntityRegistrator
+{
+	virtual void Register() override
+	{
+		// When we want to spawn this Player, we have to pass the same string to the createfunction = "Player"
+		CGamePlugin::RegisterEntityWithDefaultComponent<CPlayer>("Player");
+	}
+
+	virtual void Unregister() override
+	{
+
+	}
+};
+
+CPlayerRegistrator g_playerRegistrator;
+
 CPlayer::CPlayer()
 {
 	

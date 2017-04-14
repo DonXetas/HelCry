@@ -62,8 +62,22 @@ bool CGameRules::Init(IGameObject* _pGameObject)
 bool CGameRules::OnClientConnect(int _channelId, bool _isReset)
 {
 	// SpawnPlayer 
+	// Get the ActorSystem so we can create/spawn Actors
+	IActorSystem* pActorSystem = gEnv->pGameFramework->GetIActorSystem();
 
-	return true;
+	// Spawn the player with the name "Ericson" at the position (0, 0, 0), the rotation(0, 0, 0) and the scale (1, 1, 1)
+	// 3. Parameter = "Player" has to be the same string as the string in the registrator in Player.cpp
+	IActor* pActor = pActorSystem->CreateActor(_channelId, "Ericson", "Player", ZERO, IDENTITY, Vec3(1, 1, 1));
+
+	// If we have the creation was successful, return true, if not, return false, so the game can't start
+	if (pActor != nullptr)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 // If Player is ready for the game
@@ -75,4 +89,15 @@ bool CGameRules::OnClientEnteredGame(int _channelId, bool _isReset)
 void CGameRules::OnClientDisconnect(int _channelId, EDisconnectionCause _cause, const char* _desc, bool _keepClient)
 {
 	// DespawnPlayer
+	// Get the ActorSystem so we can delete/despawn Actors
+	IActorSystem* pActorSystem = gEnv->pGameFramework->GetIActorSystem();
+
+	// Get the Actor with the passed channelID we got as parameter
+	IActor* pActor = pActorSystem->GetActorByChannelId(_channelId);
+
+	// If we have found a Actor remove him from the System
+	if (pActor != nullptr)
+	{
+		pActorSystem->RemoveActor(pActor->GetEntityId());
+	}
 }

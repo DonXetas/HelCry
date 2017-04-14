@@ -8,6 +8,9 @@
 // We need this file, for internal functions of the registrationsystem
 #include <IGameRulesSystem.h>
 
+//We need this file, to spawn the player/actor
+#include <IActorSystem.h>
+
 // Define our class "GameRules", with this class we will control all rules in the game
 // Our custom GameRules have to inherit from the Interface "IGameRules" to give us some of the predefined functions we need
 class CGameRules : public CGameObjectExtensionHelper<CGameRules, IGameRules>
