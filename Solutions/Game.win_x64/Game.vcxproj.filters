@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="D:\Cryengine-Projekte\HelCry\Code\StdAfx.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Cryengine-Projekte\HelCry\Code\GamePlugin.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="D:\Cryengine-Projekte\HelCry\Code\StdAfx.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Cryengine-Projekte\HelCry\Code\GamePlugin.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Cryengine-Projekte\HelCry\Code\Entities\Helpers\ISimpleExtension.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Cryengine-Projekte\HelCry\Code\Player\ISimpleActor.h">
+      <Filter>Player</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Cryengine-Projekte\HelCry\Code\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Main">
+      <UniqueIdentifier>{F82DEEA0-7FE2-3CE3-81F0-2B033F475680}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entities">
+      <UniqueIdentifier>{0D949753-D5D5-37E9-9DB4-F2243571DD9E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Player">
+      <UniqueIdentifier>{10C0978A-BEF1-3344-B271-F215C78A6C13}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
