@@ -29,6 +29,11 @@ CPlayer::CPlayer()
 
 CPlayer::~CPlayer()
 {
+	// Detach the "Camera" from the Player/GameObject
+	GetGameObject()->ReleaseView(this);
+	// Detach the listener for actions from the Player/GameObject 
+	GetGameObject()->ReleaseActions(this);
+
 	// Remove this Actor from the system so we do not get any errors
 	gEnv->pGameFramework->GetIActorSystem()->RemoveActor(GetEntityId());
 }
@@ -39,6 +44,7 @@ bool CPlayer::Init(IGameObject* _pGameObject)
 	// In the Initfunction, always Set the gameobject
 	SetGameObject(_pGameObject);
 
+	// Set this Vector 3D variables to Zero (0, 0, 0)
 	m_moveDirection = ZERO;
 	m_mouseDeltaRotation = ZERO;
 
@@ -60,10 +66,43 @@ void CPlayer::PostInit(IGameObject* _pGameObject)
 	// Loading a wrong Mesh, will not physicalize the player
 	GetEntity()->LoadGeometry(0, "objects/sphere.cgf");
 
-	// We want the player to have physics, therefore add the physicalizeparams with PE_RIGID which equals a Rigidbody, so we can collide and move the player
+	// We want the player to have physics, therefore add the physicalizeparams with PE_LIVING which equals a Rigidbody, so we can collide and move the player
+	// The type "LIVING" gives the player specific attributes like "pe_player_dimensions" or "pe_player_dynamics" and he is beeing moved by "pe_action_move"
 	SEntityPhysicalizeParams entityPhysicalizeParams;
-	entityPhysicalizeParams.type = PE_RIGID;
-	entityPhysicalizeParams.mass = 100.0f;
+	entityPhysicalizeParams.type = PE_LIVING;
+	entityPhysicalizeParams.mass = 90.0f;
+
+	// PlayerDimensions
+	pe_player_dimensions playerDimensions;
+
+	// Prefer usage of a cylinder instead of capsule
+	playerDimensions.bUseCapsule = 0;
+
+	// Specify the size of our cylinder
+	playerDimensions.sizeCollider = Vec3(0.45f, 0.45f, 0.45f);
+
+	// Keep pivot at the player's feet (defined in player geometry) 
+	playerDimensions.heightPivot = 0.f;
+	// Offset collider upwards
+	playerDimensions.heightCollider = 1.f;
+
+	// If the player is 0.004 meter above the ground, it will not be grounded anymore (needed for flying/jumping actions)
+	playerDimensions.groundContactEps = 0.004f;
+
+	// Get the reference to the settings we just set, so they can be applied later in the physics
+	entityPhysicalizeParams.pPlayerDimensions = &playerDimensions;
+
+	// PlayerDynamics
+	pe_player_dynamics dynamics;
+
+	// We do not want to allow aircontrol so set it to 0, is going from 0 to 1
+	dynamics.kAirControl = 0.0f;
+
+	// Specify the mass of the PlayerDynamics
+	dynamics.mass = entityPhysicalizeParams.mass;
+
+	// Get the reference to the settings we just set, so they can be applied later in the physics
+	entityPhysicalizeParams.pPlayerDynamics = &dynamics;
 
 	// Apply the properties from above to the Player
 	GetEntity()->Physicalize(entityPhysicalizeParams);
@@ -100,17 +139,57 @@ void CPlayer::PostInit(IGameObject* _pGameObject)
 // Do something every frame
 void CPlayer::Update(SEntityUpdateContext& _ctx, int _updateSlot)
 {
-	// Get the current position in the world
+	// Get the current transformation in the world
 	Matrix34 playerTransform = GetEntity()->GetWorldTM();
 
-	// Get the current movedirection from the input and multiply it by 20, it will be variable in the future
-	Vec3 moveDirection = m_moveDirection * 20.0f;
+	// from the current playerposition create the angles for the rotation
+	Ang3 yawPitchRoll = CCamera::CreateAnglesYPR(Matrix33(playerTransform));
+	
+	// Define the rotation on the X Axis with the value we got from the action multiplied by the time passed by and the rotatespeed for smooth rotation
+	yawPitchRoll.x += m_mouseDeltaRotation.x * _ctx.fFrameTime * 0.05f;
 
-	// Add the distance which will be traveled in the passed time, relative to the rotation of the Actor/Player
-	playerTransform.AddTranslation(GetEntity()->GetWorldRotation() * moveDirection * _ctx.fFrameTime);
+	// Define the rotation on the Y Axis with the value we got from the action multiplied by the time passed by and the rotatespeed for smooth rotation
+	yawPitchRoll.y += m_mouseDeltaRotation.y * _ctx.fFrameTime * 0.05f;
+	yawPitchRoll.y = clamp_tpl(yawPitchRoll.y, -(float)g_PI * 0.5f, (float)g_PI * 0.5f);
 
-	//Set this position, so the player actually moves
-	GetEntity()->SetWorldTM(playerTransform);
+	// We do NOT want to rotate around the Z axis
+	yawPitchRoll.z = 0;
+	
+	// Set the rotation of the transform by the Orientation of the angles we calculated above
+	playerTransform.SetRotation33(CCamera::CreateOrientationYPR(yawPitchRoll));
+
+	// Set this rotation, so the player actually rotates
+	GetEntity()->SetRotation(Quat(yawPitchRoll));
+
+	// Set the rotation to (0, 0, 0) so we do not rotate the camera, even if we stopped the input
+	m_mouseDeltaRotation = ZERO;
+
+	// Get the PhysicalEntity of the player
+	IPhysicalEntity *pPhysicalEntity = GetEntity()->GetPhysicalEntity();
+
+	// If the PhysicalEntity is available get the status of the retrieved PhysicalEntity into the variable "livingStatus"
+	if (pPhysicalEntity != nullptr)
+	{
+		pe_status_living livingStatus;
+
+		if (pPhysicalEntity->GetStatus(&livingStatus) != 0)
+		{
+			// If we are not above the 0,004 meter we set in the initialization perform movement
+			if (!livingStatus.bFlying)
+			{
+				// Set the move properties, we need to move the Player with
+				pe_action_move moveAction;
+
+				// Possible 1 where the speed applies instantly and 2 where the speed adds to the current velocity
+				moveAction.iJump = 2;
+				// Get the movedirection based on the current rotation multiplied by the movedirection (x or y Axis), the speed and the time, so we have a smooth movement
+				moveAction.dir = GetEntity()->GetWorldRotation() * m_moveDirection * 20.0f * _ctx.fFrameTime;
+
+				// Perform the action and let the Player move
+				pPhysicalEntity->Action(&moveAction);
+			}
+		}
+	}
 }
 
 //Update the "Camera"
@@ -153,20 +232,40 @@ void CPlayer::OnAction(const ActionId& _action, int _activationMode, float _valu
 	else if (!strcmp(_action.c_str(), "moveleft"))
 	{
 		m_moveDirection.x = -_value;
+		CryLog("m_moveDirection.x changed to the value: %f", m_moveDirection.x);
+		return;
 	}
 	// If the string is "moveright", set the movedirection on the X Axis plus the value
 	else if (!strcmp(_action.c_str(), "moveright"))
 	{
 		m_moveDirection.x = _value;
+		CryLog("m_moveDirection.x changed to the value: %f", m_moveDirection.x);
+		return;
 	}
 	// If the string is "moveforward", set the movedirection on the Y Axis plus the value
 	else if (!strcmp(_action.c_str(), "moveforward"))
 	{
 		m_moveDirection.y = _value;
+		CryLog("m_moveDirection.y changed to the value: %f", m_moveDirection.y);
+		return;
 	}
 	// If the string is "moveback", set the movedirection on the Y Axis minus the value
 	else if (!strcmp(_action.c_str(), "moveback"))
 	{
 		m_moveDirection.y = -_value;
+		CryLog("m_moveDirection.y changed to the value: %f", m_moveDirection.y);
+		return;
+	}
+	// If the string is "mouse_rotateyaw", set the m_mouseDeltaRotation on the X Axis minus the value
+	else if (!strcmp(_action.c_str(), "mouse_rotateyaw"))
+	{
+		m_mouseDeltaRotation.x -= _value;
+		return;
+	}
+	// If the string is "mouse_rotatepitch", set the m_mouseDeltaRotation on the Y Axis minus the value
+	else if (!strcmp(_action.c_str(), "mouse_rotatepitch"))
+	{
+		m_mouseDeltaRotation.y -= _value;
+		return;
 	}
 }
