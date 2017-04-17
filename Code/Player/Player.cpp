@@ -72,37 +72,9 @@ void CPlayer::PostInit(IGameObject* _pGameObject)
 	entityPhysicalizeParams.type = PE_LIVING;
 	entityPhysicalizeParams.mass = 90.0f;
 
-	// PlayerDimensions
-	pe_player_dimensions playerDimensions;
+	SetPlayerDimensions(entityPhysicalizeParams);
 
-	// Prefer usage of a cylinder instead of capsule
-	playerDimensions.bUseCapsule = 0;
-
-	// Specify the size of our cylinder
-	playerDimensions.sizeCollider = Vec3(0.45f, 0.45f, 0.45f);
-
-	// Keep pivot at the player's feet (defined in player geometry) 
-	playerDimensions.heightPivot = 0.f;
-	// Offset collider upwards
-	playerDimensions.heightCollider = 1.f;
-
-	// If the player is 0.004 meter above the ground, it will not be grounded anymore (needed for flying/jumping actions)
-	playerDimensions.groundContactEps = 0.004f;
-
-	// Get the reference to the settings we just set, so they can be applied later in the physics
-	entityPhysicalizeParams.pPlayerDimensions = &playerDimensions;
-
-	// PlayerDynamics
-	pe_player_dynamics dynamics;
-
-	// We do not want to allow aircontrol so set it to 0, is going from 0 to 1
-	dynamics.kAirControl = 0.0f;
-
-	// Specify the mass of the PlayerDynamics
-	dynamics.mass = entityPhysicalizeParams.mass;
-
-	// Get the reference to the settings we just set, so they can be applied later in the physics
-	entityPhysicalizeParams.pPlayerDynamics = &dynamics;
+	SetPlayerDynamics(entityPhysicalizeParams);
 
 	// Apply the properties from above to the Player
 	GetEntity()->Physicalize(entityPhysicalizeParams);
@@ -113,24 +85,7 @@ void CPlayer::PostInit(IGameObject* _pGameObject)
 	// Attach the Capturelistener to the Actor, so the Actor reacts on Keyinput
 	GetGameObject()->CaptureActions(this);
 
-	// Get the ActionMapManager, so we can initialize the Keyinput and the profile used for the character
-	IActionMapManager* pActionMapManager = gEnv->pGameFramework->GetIActionMapManager();
-
-	// Initialize the given xml file
-	pActionMapManager->InitActionMaps("libs/config/DefaultProfile.xml");
-	// Enable the file so we can activate a profile inside the file
-	pActionMapManager->Enable(true);
-	// Enable the profile inside the file 
-	pActionMapManager->EnableActionMap("simple", true);
-
-	// Get the keybindings inside the profile
-	IActionMap* pActionMap = pActionMapManager->GetActionMap("simple");
-
-	// If the profile is available set this actor as the listener, so the actor can react to the input
-	if (pActionMap != nullptr)
-	{
-		pActionMap->SetActionListener(GetEntityId());
-	}
+	SetActionListener();
 
 	// Enable the update function of this gameObject/Actor, without this, Update will not be called
 	_pGameObject->EnableUpdateSlot(this, 0);
@@ -139,57 +94,11 @@ void CPlayer::PostInit(IGameObject* _pGameObject)
 // Do something every frame
 void CPlayer::Update(SEntityUpdateContext& _ctx, int _updateSlot)
 {
-	// Get the current transformation in the world
-	Matrix34 playerTransform = GetEntity()->GetWorldTM();
+	//Rotate the player
+	RotatePlayer(_ctx.fFrameTime);
 
-	// from the current playerposition create the angles for the rotation
-	Ang3 yawPitchRoll = CCamera::CreateAnglesYPR(Matrix33(playerTransform));
-	
-	// Define the rotation on the X Axis with the value we got from the action multiplied by the time passed by and the rotatespeed for smooth rotation
-	yawPitchRoll.x += m_mouseDeltaRotation.x * _ctx.fFrameTime * 0.05f;
-
-	// Define the rotation on the Y Axis with the value we got from the action multiplied by the time passed by and the rotatespeed for smooth rotation
-	yawPitchRoll.y += m_mouseDeltaRotation.y * _ctx.fFrameTime * 0.05f;
-	yawPitchRoll.y = clamp_tpl(yawPitchRoll.y, -(float)g_PI * 0.5f, (float)g_PI * 0.5f);
-
-	// We do NOT want to rotate around the Z axis
-	yawPitchRoll.z = 0;
-	
-	// Set the rotation of the transform by the Orientation of the angles we calculated above
-	playerTransform.SetRotation33(CCamera::CreateOrientationYPR(yawPitchRoll));
-
-	// Set this rotation, so the player actually rotates
-	GetEntity()->SetRotation(Quat(yawPitchRoll));
-
-	// Set the rotation to (0, 0, 0) so we do not rotate the camera, even if we stopped the input
-	m_mouseDeltaRotation = ZERO;
-
-	// Get the PhysicalEntity of the player
-	IPhysicalEntity *pPhysicalEntity = GetEntity()->GetPhysicalEntity();
-
-	// If the PhysicalEntity is available get the status of the retrieved PhysicalEntity into the variable "livingStatus"
-	if (pPhysicalEntity != nullptr)
-	{
-		pe_status_living livingStatus;
-
-		if (pPhysicalEntity->GetStatus(&livingStatus) != 0)
-		{
-			// If we are not above the 0,004 meter we set in the initialization perform movement
-			if (!livingStatus.bFlying)
-			{
-				// Set the move properties, we need to move the Player with
-				pe_action_move moveAction;
-
-				// Possible 1 where the speed applies instantly and 2 where the speed adds to the current velocity
-				moveAction.iJump = 2;
-				// Get the movedirection based on the current rotation multiplied by the movedirection (x or y Axis), the speed and the time, so we have a smooth movement
-				moveAction.dir = GetEntity()->GetWorldRotation() * m_moveDirection * 20.0f * _ctx.fFrameTime;
-
-				// Perform the action and let the Player move
-				pPhysicalEntity->Action(&moveAction);
-			}
-		}
-	}
+	//Move the player
+	MovePlayer(_ctx.fFrameTime);
 }
 
 //Update the "Camera"
@@ -267,5 +176,131 @@ void CPlayer::OnAction(const ActionId& _action, int _activationMode, float _valu
 	{
 		m_mouseDeltaRotation.y -= _value;
 		return;
+	}
+}
+
+// Set the PlayerDimensions in the PostInit function
+// Beautify code
+void CPlayer::SetPlayerDimensions(SEntityPhysicalizeParams& _physicalParams)
+{
+	// PlayerDimensions
+	pe_player_dimensions playerDimensions;
+
+	// Prefer usage of a cylinder instead of capsule
+	playerDimensions.bUseCapsule = 0;
+
+	// Specify the size of our cylinder
+	playerDimensions.sizeCollider = Vec3(0.45f, 0.45f, 0.45f);
+
+	// Keep pivot at the player's feet (defined in player geometry) 
+	playerDimensions.heightPivot = 0.f;
+	// Offset collider upwards
+	playerDimensions.heightCollider = 1.f;
+
+	// If the player is 0.004 meter above the ground, it will not be grounded anymore (needed for flying/jumping actions)
+	playerDimensions.groundContactEps = 0.004f;
+
+	// Get the reference to the settings we just set, so they can be applied later in the physics
+	_physicalParams.pPlayerDimensions = &playerDimensions;
+}
+
+// Set the PlayerDynamics in the PostInit function
+// Beautify code
+void CPlayer::SetPlayerDynamics(SEntityPhysicalizeParams& _physicalParams)
+{
+	// PlayerDynamics
+	pe_player_dynamics dynamics;
+
+	// We do not want to allow aircontrol so set it to 0, is going from 0 to 1
+	dynamics.kAirControl = 0.0f;
+
+	// Specify the mass of the PlayerDynamics
+	dynamics.mass = _physicalParams.mass;
+
+	// Get the reference to the settings we just set, so they can be applied later in the physics
+	_physicalParams.pPlayerDynamics = &dynamics;
+}
+
+// Set the Actionlistener in the PostInit function
+// Beautify code
+void CPlayer::SetActionListener()
+{
+	// Get the ActionMapManager, so we can initialize the Keyinput and the profile used for the character
+	IActionMapManager* pActionMapManager = gEnv->pGameFramework->GetIActionMapManager();
+
+	// Initialize the given xml file
+	pActionMapManager->InitActionMaps("libs/config/DefaultProfile.xml");
+	// Enable the file so we can activate a profile inside the file
+	pActionMapManager->Enable(true);
+	// Enable the profile inside the file 
+	pActionMapManager->EnableActionMap("simple", true);
+
+	// Get the keybindings inside the profile
+	IActionMap* pActionMap = pActionMapManager->GetActionMap("simple");
+
+	// If the profile is available set this actor as the listener, so the actor can react to the input
+	if (pActionMap != nullptr)
+	{
+		pActionMap->SetActionListener(GetEntityId());
+	}
+}
+
+// Beautify code
+void CPlayer::RotatePlayer(float _frametime)
+{
+	// Get the current transformation in the world
+	Matrix34 playerTransform = GetEntity()->GetWorldTM();
+
+	// from the current playerposition create the angles for the rotation
+	Ang3 yawPitchRoll = CCamera::CreateAnglesYPR(Matrix33(playerTransform));
+
+	// Define the rotation on the X Axis with the value we got from the action multiplied by the time passed by and the rotatespeed for smooth rotation
+	yawPitchRoll.x += m_mouseDeltaRotation.x * _frametime * 0.05f;
+
+	// Define the rotation on the Y Axis with the value we got from the action multiplied by the time passed by and the rotatespeed for smooth rotation
+	yawPitchRoll.y += m_mouseDeltaRotation.y * _frametime * 0.05f;
+	yawPitchRoll.y = clamp_tpl(yawPitchRoll.y, -(float)g_PI * 0.5f, (float)g_PI * 0.5f);
+
+	// We do NOT want to rotate around the Z axis
+	yawPitchRoll.z = 0;
+
+	// Set the rotation of the transform by the Orientation of the angles we calculated above
+	playerTransform.SetRotation33(CCamera::CreateOrientationYPR(yawPitchRoll));
+
+	// Set this rotation, so the player actually rotates
+	GetEntity()->SetRotation(Quat(yawPitchRoll));
+
+	// Set the rotation to (0, 0, 0) so we do not rotate the camera, even if we stopped the input
+	m_mouseDeltaRotation = ZERO;
+}
+
+// Beautify code
+void CPlayer::MovePlayer(float _frametime)
+{
+	// Get the PhysicalEntity of the player
+	IPhysicalEntity *pPhysicalEntity = GetEntity()->GetPhysicalEntity();
+
+	// If the PhysicalEntity is available get the status of the retrieved PhysicalEntity into the variable "livingStatus"
+	if (pPhysicalEntity != nullptr)
+	{
+		pe_status_living livingStatus;
+
+		if (pPhysicalEntity->GetStatus(&livingStatus) != 0)
+		{
+			// If we are not above the 0,004 meter we set in the initialization perform movement
+			if (!livingStatus.bFlying)
+			{
+				// Set the move properties, we need to move the Player with
+				pe_action_move moveAction;
+
+				// Possible 1 where the speed applies instantly and 2 where the speed adds to the current velocity
+				moveAction.iJump = 2;
+				// Get the movedirection based on the current rotation multiplied by the movedirection (x or y Axis), the speed and the time, so we have a smooth movement
+				moveAction.dir = GetEntity()->GetWorldRotation() * m_moveDirection * 20.0f * _frametime;
+
+				// Perform the action and let the Player move
+				pPhysicalEntity->Action(&moveAction);
+			}
+		}
 	}
 }

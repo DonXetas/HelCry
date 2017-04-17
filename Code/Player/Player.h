@@ -52,4 +52,21 @@ public:
 private:
 	Vec3 m_moveDirection;
 	Vec2 m_mouseDeltaRotation;
+
+	// Set the PlayerDimensions in the PostInit function
+	// Beautify code
+	void SetPlayerDimensions(SEntityPhysicalizeParams &_physicalParams);
+	// Set the PlayerDynamics in the PostInit function
+	// Beautify code
+	void SetPlayerDynamics(SEntityPhysicalizeParams &_physicalParams);
+
+	// Set the Actionlistener in the PostInit function
+	// Beautify code
+	void SetActionListener();
+
+	// Beautify code
+	void RotatePlayer(float _frametime);
+
+	// Beautify code
+	void MovePlayer(float _frametime);
 };
